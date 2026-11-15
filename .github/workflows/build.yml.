@@ -14,12 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Unzip the game project
-        run: |
-          Z="$(ls *.zip | head -n1)"
-          echo "Using $Z"
-          unzip -q -o "$Z" -d build
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -30,15 +24,13 @@ jobs:
           java-version: 21
 
       - name: Install Capacitor
-        working-directory: build/pitchside-app
         run: npm install --no-audit --no-fund
 
       - name: Copy the game into the Android project
-        working-directory: build/pitchside-app
         run: npx cap sync android
 
       - name: Build the APK
-        working-directory: build/pitchside-app/android
+        working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
@@ -46,7 +38,7 @@ jobs:
       - name: Name the APK
         run: |
           mkdir -p out
-          cp build/pitchside-app/android/app/build/outputs/apk/release/app-release.apk "out/PitchsideCareer-1.0.${{ github.run_number }}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "out/PitchsideCareer-1.0.${{ github.run_number }}.apk"
 
       - name: Publish as a release
         uses: softprops/action-gh-release@v2
